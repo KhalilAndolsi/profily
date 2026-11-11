@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+import { Link } from "react-router-dom";
 
 const templates = [
   {
@@ -32,13 +33,13 @@ const templates = [
     image: "/images/design.jpg",
   },
   {
-    title: "Product designer",
+    title: "Creative professional",
     category: "Portfolio",
     image: "/images/gdesign.jpg",
   },
   {
-    title: "Product landing page",
-    category: "Business",
+    title: "Links page",
+    category: "Personal",
     image: "/images/product.jpg",
   },
 ];
@@ -67,10 +68,10 @@ const features = [
   },
   {
     icon: Globe2,
-    title: "Product Landing Page",
+    title: "Links Page",
     description:
-      "Launch a focused page for your product, service, or next big idea.",
-    badge: "New",
+      "Share your CV, portfolio, social profiles, and everything you do from one beautiful page.",
+    badge: "Quick setup",
   },
 ];
 
@@ -78,17 +79,20 @@ const steps = [
   {
     number: "01",
     title: "Choose a template",
-    description: "Start with a layout designed for your goals and your audience.",
+    description:
+      "Start with a layout designed for your goals and your audience.",
   },
   {
     number: "02",
     title: "Customize your content",
-    description: "Add your story, projects, links, and personality in a few clicks.",
+    description:
+      "Add your story, projects, links, and personality in a few clicks.",
   },
   {
     number: "03",
     title: "Publish & share",
-    description: "Go live instantly with a polished page ready to share anywhere.",
+    description:
+      "Go live instantly with a polished page ready to share anywhere.",
   },
 ];
 
@@ -114,13 +118,17 @@ const Home = () => {
             unmistakably yours.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button size="lg" className="h-12 px-6">
-              Start building for free
-              <ArrowRight />
-            </Button>
-            <Button size="lg" variant="outline" className="h-12 px-6">
-              Explore templates
-            </Button>
+            <Link to="/dashboard">
+              <Button size="lg" className="h-12 px-6">
+                Start building for free
+                <ArrowRight />
+              </Button>
+            </Link>
+            <Link to="/templates">
+              <Button size="lg" variant="outline" className="h-12 px-6">
+                Explore templates
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -143,16 +151,18 @@ const Home = () => {
                     className="size-16 rounded-full object-cover ring-4 ring-muted"
                   />
                   <div>
-                    <p className="font-semibold text-card-foreground">Alex Morgan</p>
-                    <p className="text-sm text-primary">Product Designer</p>
+                    <p className="font-semibold text-card-foreground">
+                      Alex Morgan
+                    </p>
+                    <p className="text-sm text-primary">Creative Professional</p>
                   </div>
                 </div>
                 <p className="mt-6 text-2xl font-semibold tracking-tight text-card-foreground">
-                  Designing digital products people love to use.
+                  Sharing work and ideas people love to discover.
                 </p>
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                  A curated collection of selected work, experience, and ways
-                  to connect.
+                  A curated collection of selected work, experience, and ways to
+                  connect.
                 </p>
                 <Button className="mt-6 w-fit" size="sm">
                   View my work
@@ -179,8 +189,8 @@ const Home = () => {
               One tool, built for all your best work.
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Skip the blank page. Profily gives you the building blocks to
-              look professional from day one.
+              Skip the blank page. Profily gives you the building blocks to look
+              professional from day one.
             </p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
@@ -196,7 +206,9 @@ const Home = () => {
                     </span>
                     <Badge variant="secondary">{feature.badge}</Badge>
                   </div>
-                  <CardTitle className="pt-3 text-lg">{feature.title}</CardTitle>
+                  <CardTitle className="pt-3 text-lg">
+                    {feature.title}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm leading-6 text-muted-foreground">
@@ -229,7 +241,9 @@ const Home = () => {
                   <span className="flex size-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                     {step.number}
                   </span>
-                  <h3 className="mt-6 font-semibold text-card-foreground">{step.title}</h3>
+                  <h3 className="mt-6 font-semibold text-card-foreground">
+                    {step.title}
+                  </h3>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     {step.description}
                   </p>
@@ -267,8 +281,12 @@ const Home = () => {
                   className="aspect-[1.4] w-full object-cover transition-transform group-hover:scale-[1.02]"
                 />
                 <CardContent className="p-5">
-                  <p className="text-xs font-medium text-primary">{template.category}</p>
-                  <h3 className="mt-1 font-semibold text-card-foreground">{template.title}</h3>
+                  <p className="text-xs font-medium text-primary">
+                    {template.category}
+                  </p>
+                  <h3 className="mt-1 font-semibold text-card-foreground">
+                    {template.title}
+                  </h3>
                 </CardContent>
               </Card>
             ))}
@@ -290,19 +308,25 @@ const Home = () => {
               Make your next opportunity easier to find. Start with a template,
               make it yours, and share it with the world.
             </p>
-            <Button size="lg" className="mt-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+            <Button
+              size="lg"
+              className="mt-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+            >
               Create your free page
               <ArrowRight />
             </Button>
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-primary-foreground/70">
               <span className="flex items-center gap-1.5">
-                <Check className="size-3.5 text-primary-foreground" /> Free forever plan
+                <Check className="size-3.5 text-primary-foreground" /> Free
+                forever plan
               </span>
               <span className="flex items-center gap-1.5">
-                <Check className="size-3.5 text-primary-foreground" /> Publish in minutes
+                <Check className="size-3.5 text-primary-foreground" /> Publish
+                in minutes
               </span>
               <span className="flex items-center gap-1.5">
-                <Star className="size-3.5 fill-primary-foreground text-primary-foreground" /> Loved by creators
+                <Star className="size-3.5 fill-primary-foreground text-primary-foreground" />{" "}
+                Loved by creators
               </span>
             </div>
           </div>

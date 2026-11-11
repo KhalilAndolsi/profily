@@ -7,7 +7,7 @@ import ToggleThemeButton from "./ToggleThemeButton";
 
 const Footer = () => {
   return (
-    <footer className="container mx-auto px-6 py-6 sm:px-10 lg:px-16 flex gap-6 flex-col lg:flex-row items-center justify-center lg:justify-between">
+    <footer className="container mx-auto px-6 py-6 sm:px-10 lg:px-16 flex gap-6 flex-col lg:flex-row items-center justify-center lg:justify-between print:hidden">
       <div className="flex items-center justify-center flex-wrap max-sm:flex-col gap-2">
         <Link to="/">
           <h1 className="flex items-center gap-1">
@@ -30,17 +30,17 @@ const Footer = () => {
         </p>
       </div>
       <nav className="flex items-center justify-center flex-wrap gap-4">
-        <Link to="/">
-          <Button variant="ghost">Landing page</Button>
-        </Link>
-        <Link to="/">
+        <Link to="/templates">
           <Button variant="ghost">Templates</Button>
         </Link>
-        <Link to="/">
+        <Link to="/examples">
           <Button variant="ghost">Examples</Button>
         </Link>
-        <Link to="/">
+        <Link to="/contact">
           <Button variant="ghost">Contact</Button>
+        </Link>
+        <Link to="/privacy-policy">
+          <Button variant="ghost">Privacy Policy</Button>
         </Link>
         <ToggleThemeButton />
       </nav>

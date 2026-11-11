@@ -171,3 +171,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-foreground);
+}
