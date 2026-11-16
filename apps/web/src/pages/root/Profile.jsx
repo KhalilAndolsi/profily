@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   AlertTriangle,
+  Calendar,
   Mail,
   Monitor,
   Moon,
@@ -29,15 +30,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const user = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  username: "@johndoe",
-  avatar: "https://github.com/shadcn.png",
-};
+import { useAuth } from "@/components/providers/auth-provider";
 
 const Profile = () => {
+  const {user} = useAuth();
   const { theme, setTheme } = useTheme();
   const [message, setMessage] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
@@ -80,18 +76,18 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="flex flex-col gap-6 sm:flex-row sm:items-center">
             <Avatar size="lg" className="size-24">
-              <AvatarImage src={user.avatar} alt={`${user.name}'s avatar`} />
+              <AvatarImage src={user.avatar} alt={`${user.nickname}'s avatar`} />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
             <div className="space-y-2">
-              <h2 className="text-xl font-semibold">{user.name}</h2>
+              <h2 className="text-xl font-semibold">{user.nickname}</h2>
               <p className="flex items-center gap-2 text-muted-foreground">
                 <Mail size={16} />
                 {user.email}
               </p>
               <p className="flex items-center gap-2 text-muted-foreground">
-                <UserRound size={16} />
-                {user.username}
+                <Calendar size={16} />
+                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
               </p>
             </div>
           </CardContent>
@@ -114,7 +110,7 @@ const Profile = () => {
               </div>
               <div className="flex items-center gap-4">
                 <Avatar size="lg" className="size-20">
-                  <AvatarImage src={user.avatar} alt={`${user.name}'s avatar`} />
+                  <AvatarImage src={user.avatar} alt={`${user.nickname}'s avatar`} />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <Button type="button" variant="outline">
@@ -126,7 +122,7 @@ const Profile = () => {
                 <Label htmlFor="display-name">Display name</Label>
                 <Input
                   id="display-name"
-                  defaultValue={user.name}
+                  defaultValue={user.nickname}
                 />
               </div>
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

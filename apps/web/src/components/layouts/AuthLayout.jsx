@@ -3,10 +3,11 @@ import { Link, Outlet } from "react-router-dom";
 import { buttonVariants } from "../ui/button";
 import { ArrowBigLeft, Fingerprint } from "lucide-react";
 import Footer from "../Footer";
+import { ProtectedRoute } from "@/hooks/useProtectedRoute";
 
 const AuthLayout = () => {
   return (
-    <>
+    <ProtectedRoute authRoute={true}>
       <main className="min-h-screen flex flex-col">
         <header className="flex items-center justify-between p-5">
           <h1 className="sm:hidden flex items-center gap-1">
@@ -33,7 +34,7 @@ const AuthLayout = () => {
         </div>
         <Footer />
       </main>
-    </>
+    </ProtectedRoute>
   );
 };
 

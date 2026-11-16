@@ -9,10 +9,59 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
+import { useState } from "react";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = ({ target }) => {
+    setFormData((currentData) => ({
+      ...currentData,
+      [target.name]: target.value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+
+    if (!formData.email.trim() || !formData.password) {
+      setError("Email and password are required.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await login(formData);
+      navigate("/dashboard", { replace: true });
+    } catch (requestError) {
+      setError(
+        requestError.response?.data?.message ||
+          requestError.message ||
+          "Unable to sign in.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center">
       <h1 className="hidden sm:flex items-center gap-1">
@@ -30,16 +79,37 @@ const Login = () => {
           pages.
         </CardDescription>
         <CardContent className="mt-8 px-0 space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-0.5">
             <Label htmlFor="email">Email</Label>
-            <Input type="email" placeholder="you@example.com" id="email" />
+            <Input
+              type="email"
+              placeholder="you@example.com"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
           </div>
           <div className="space-y-0.5">
             <Label htmlFor="password">Password</Label>
-            <Input type="password" placeholder="••••••••" id="password" />
+            <Input
+              type="password"
+              placeholder="••••••••"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
           </div>
           <div className="flex items-center">
-            <Checkbox id="remember" />
+            <Checkbox
+              id="remember"
+              checked={rememberMe}
+              onCheckedChange={setRememberMe}
+            />
             <Label
               htmlFor="remember"
               className="ml-2 text-muted-foreground text-xs"
@@ -47,9 +117,15 @@ const Login = () => {
               Remember me
             </Label>
           </div>
-          <Button className="w-full" size="lg">
-            Sign In <Key />
+          {error && (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          )}
+          <Button className="w-full" size="lg" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in..." : "Sign In"} <Key />
           </Button>
+          </form>
           <p className="text-center px-12">
             Don't have an account?{" "}
             <Link to="/auth/signup" className="text-primary hover:underline">

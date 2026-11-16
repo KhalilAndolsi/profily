@@ -25,34 +25,83 @@ import Profile from "./pages/root/Profile";
 import RootLayout from "./components/layouts/RootLayout";
 import AuthLayout from "./components/layouts/AuthLayout";
 import AdminDashboard from "./pages/root/AdminDashboard";
+import { ProtectedRoute } from "./hooks/useProtectedRoute";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<RootLayout />}>
-        <h1>test</h1>
           <Route index element={<Home />} />
           <Route path="privacy-policy" element={<PrivacyPolicy />} />
           <Route path="templates" element={<Templates />} />
           <Route path="examples" element={<Examples />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="profile" element={<Profile />} />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="contact" element={<Contact />} />
 
-          <Route path="cv/create" element={<CreateCV />} />
-          <Route path="cv/edit/:id" element={<CreateCV forEdit={true}/>} />
+          <Route
+            path="cv/create"
+            element={
+              <ProtectedRoute>
+                <CreateCV />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="cv/edit/:id"
+            element={
+              <ProtectedRoute>
+                <CreateCV forEdit={true} />
+              </ProtectedRoute>
+            }
+          />
           <Route path="cv/preview" element={<PreviewCV />} />
 
-          <Route path="portfolio/create" element={<CreatePortfolio />} />
-          <Route path="portfolio/edit/:id" element={<CreatePortfolio />} />
+          <Route
+            path="portfolio/create"
+            element={
+              <ProtectedRoute>
+                <CreatePortfolio />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="portfolio/edit/:id"
+            element={
+              <ProtectedRoute>
+                <CreatePortfolio />
+              </ProtectedRoute>
+            }
+          />
           <Route path="portfolio/preview" element={<PreviewPortfolio forEdit={true}/>} />
 
-          <Route path="link-page/create" element={<CreateLinkPage />} />
-          <Route path="link-page/edit/:id" element={<CreateLinkPage forEdit={true}/>} />
+          <Route
+            path="link-page/create"
+            element={
+              <ProtectedRoute>
+                <CreateLinkPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="link-page/edit/:id"
+            element={
+              <ProtectedRoute>
+                <CreateLinkPage forEdit={true} />
+              </ProtectedRoute>
+            }
+          />
           <Route path="link-page/preview" element={<PreviewLinkPage />} />
           
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute isAdminRoute={true}><AdminDashboard /></ProtectedRoute>} />
 
           <Route path="*" element={<NotFound />} />
         </Route>
