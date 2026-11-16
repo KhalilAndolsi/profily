@@ -12,11 +12,7 @@ import { Link } from "react-router-dom";
 import { Button, buttonVariants } from "./ui/button";
 import { Separator } from "@base-ui/react";
 import ToggleThemeButton from "./ToggleThemeButton";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "./ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,9 +27,10 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "./ui/drawer";
+import { useAuth } from "./providers/auth-provider";
 
 const Header = () => {
-  const isLoggedin = true;
+  const { isAuthenticated, user, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
@@ -75,7 +72,7 @@ const Header = () => {
       <nav className="hidden md:flex items-center gap-2">
         <ToggleThemeButton />
         <Separator orientation="vertical" className="bg-muted h-6 w-0.5" />
-        {isLoggedin ? (
+        {isAuthenticated ? (
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -89,8 +86,11 @@ const Header = () => {
             >
               <Avatar size="lg">
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
-                  alt="User avatar"
+                  src={
+                    user.avatar ||
+                    "https://api.dicebear.com/10.x/lorelei/svg?seed=default"
+                  }
+                  alt={user.nickname || "User avatar"}
                 />
                 <AvatarFallback>U</AvatarFallback>
               </Avatar>
@@ -108,16 +108,20 @@ const Header = () => {
                   Dashboard
                 </DropdownMenuItem>
               </Link>
-              <Link to="/admin/dashboard">
-                <DropdownMenuItem>
-                  <ShieldCheck />
-                  Admin dashboard
-                </DropdownMenuItem>
-              </Link>
+              {user.role === "admin" && (
+                <Link to="/admin/dashboard">
+                  <DropdownMenuItem>
+                    <ShieldCheck />
+                    Admin dashboard
+                  </DropdownMenuItem>
+                </Link>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem className={buttonVariants({variant: "destructive", className: "w-full"})}>
-                <LogOut />
-                Sign out
+              <DropdownMenuItem className="p-0 bg-transparent hover:bg-transparent">
+                <Button variant="destructive" className="w-full" onClick={signOut}>
+                  <LogOut />
+                  Sign out
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -156,7 +160,7 @@ const Header = () => {
             </div>
           </DrawerHeader>
           <nav className="flex flex-1 flex-col gap-6 overflow-y-auto p-6 pt-0">
-            {isLoggedin && (
+            {isAuthenticated && (
               <div className="border-t pt-4 flex flex-col gap-2 items-start">
                 <Link to="/profile" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-star">
@@ -197,7 +201,7 @@ const Header = () => {
             </div>
           </nav>
           <DrawerFooter className="p-6 pt-0">
-            {isLoggedin ? (
+            {isAuthenticated ? (
               <Button
                 variant="destructive"
                 className="w-full justify-start"
