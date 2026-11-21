@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   BriefcaseBusiness,
   FileText,
@@ -26,45 +26,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-const initialUsers = [
-  {
-    id: 1,
-    name: "Khalil Andolsi",
-    email: "khalil.andolsi@example.com",
-    cv: 2,
-    portfolios: 1,
-    links: 2,
-    joined: "Jan 12, 2025",
-  },
-  {
-    id: 2,
-    name: "Sarah Martin",
-    email: "sarah.martin@example.com",
-    cv: 1,
-    portfolios: 2,
-    links: 1,
-    joined: "Jan 18, 2025",
-  },
-  {
-    id: 3,
-    name: "Youssef Ben Salem",
-    email: "youssef.bensalem@example.com",
-    cv: 3,
-    portfolios: 1,
-    links: 3,
-    joined: "Feb 02, 2025",
-  },
-  {
-    id: 4,
-    name: "Emma Wilson",
-    email: "emma.wilson@example.com",
-    cv: 1,
-    portfolios: 0,
-    links: 1,
-    joined: "Feb 11, 2025",
-  },
-];
+import api from "@/lib/api";
+import { useAuth } from "@/components/providers/auth-provider";
 
 const statCards = [
   { key: "users", label: "Users", description: "Registered users", icon: UserRound },
@@ -84,25 +47,102 @@ const statCards = [
 ];
 
 const AdminDashboard = () => {
-  const [users, setUsers] = React.useState(initialUsers);
-  const [userToDelete, setUserToDelete] = React.useState(null);
+  const { user: currentUser } = useAuth();
+  const [users, setUsers] = useState([]);
+  const [totals, setTotals] = useState({
+    users: 0,
+    cv: 0,
+    portfolios: 0,
+    links: 0,
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const totals = users.reduce(
-    (result, user) => ({
-      users: result.users + 1,
-      cv: result.cv + user.cv,
-      portfolios: result.portfolios + user.portfolios,
-      links: result.links + user.links,
-    }),
-    { users: 0, cv: 0, portfolios: 0, links: 0 },
-  );
-  const deleteUser = () => {
+  useEffect(() => {
+    let ignore = false;
+
+    const loadDashboard = async () => {
+      setIsLoading(true);
+      setError("");
+      try {
+        const response = await api.get("/admin/dashboard");
+        if (!ignore) {
+          setUsers(response.data.users);
+          setTotals(response.data.totals);
+        }
+      } catch (requestError) {
+        if (!ignore) {
+          setError(
+            requestError.response?.data?.message ||
+              "Unable to load admin dashboard data.",
+          );
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    };
+
+    loadDashboard();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const deleteUser = async () => {
     if (!userToDelete) return;
 
-    setUsers((currentUsers) =>
-      currentUsers.filter((user) => user.id !== userToDelete.id),
+    setIsDeleting(true);
+    setError("");
+    try {
+      await api.delete(`/admin/users/${encodeURIComponent(userToDelete.id)}`);
+      setUsers((currentUsers) =>
+        currentUsers.filter((user) => user.id !== userToDelete.id),
+      );
+      setTotals((currentTotals) => ({
+        ...currentTotals,
+        users: Math.max(0, currentTotals.users - 1),
+        cv: Math.max(0, currentTotals.cv - userToDelete.cv),
+        portfolios: Math.max(
+          0,
+          currentTotals.portfolios - userToDelete.portfolios,
+        ),
+        links: Math.max(0, currentTotals.links - userToDelete.links),
+      }));
+      setUserToDelete(null);
+    } catch (requestError) {
+      setError(
+        requestError.response?.data?.message ||
+          "Unable to delete this user.",
+      );
+      setUserToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const visibleUsers = useMemo(() => {
+    if (!normalizedSearch) return users;
+
+    return users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(normalizedSearch) ||
+        user.email.toLowerCase().includes(normalizedSearch),
     );
-    setUserToDelete(null);
+  }, [normalizedSearch, users]);
+
+  const formatJoinedDate = (joined) => {
+    if (!joined) return "Unknown";
+    const date = new Date(joined);
+    if (Number.isNaN(date.getTime())) return "Unknown";
+    return new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    }).format(date);
   };
 
   return (
@@ -124,6 +164,15 @@ const AdminDashboard = () => {
           {users.length} active {users.length === 1 ? "user" : "users"}
         </p>
       </header>
+
+      {error && (
+        <div
+          role="alert"
+          className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
+          {error}
+        </div>
+      )}
 
       <section
         aria-label="Platform statistics"
@@ -169,6 +218,8 @@ const AdminDashboard = () => {
                 placeholder="Search users..."
                 aria-label="Search users by name or email"
                 className="pl-9"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
               />
             </div>
           </div>
@@ -200,7 +251,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {users.map((user) => (
+                {visibleUsers.map((user) => (
                   <tr key={user.id} className="transition-colors hover:bg-muted/30">
                     <td className="px-4 py-4 sm:px-6">
                       <p className="font-medium">{user.name}</p>
@@ -209,27 +260,43 @@ const AdminDashboard = () => {
                     <td className="px-4 py-4">{user.cv}</td>
                     <td className="px-4 py-4">{user.portfolios}</td>
                     <td className="px-4 py-4">{user.links}</td>
-                    <td className="px-4 py-4 text-muted-foreground">{user.joined}</td>
+                    <td className="px-4 py-4 text-muted-foreground">
+                      {formatJoinedDate(user.joined)}
+                    </td>
                     <td className="px-4 py-4 text-right sm:px-6">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        aria-label={`Delete ${user.name}`}
-                        onClick={() => setUserToDelete(user)}
-                      >
-                        <Trash2 />
-                        <span className="hidden sm:inline">Delete</span>
-                      </Button>
+                      {String(user.id) !== String(currentUser?.id) ? (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          aria-label={`Delete ${user.name}`}
+                          onClick={() => setUserToDelete(user)}
+                        >
+                          <Trash2 />
+                          <span className="hidden sm:inline">Delete</span>
+                        </Button>
+                      ) : null}
                     </td>
                   </tr>
                 ))}
-                {users.length === 0 && (
+                {isLoading && (
                   <tr>
                     <td
                       colSpan="6"
                       className="px-6 py-12 text-center text-muted-foreground"
                     >
-                      No users to display.
+                      Loading users...
+                    </td>
+                  </tr>
+                )}
+                {!isLoading && visibleUsers.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="px-6 py-12 text-center text-muted-foreground"
+                    >
+                      {users.length === 0
+                        ? "No users to display."
+                        : "No users match your search."}
                     </td>
                   </tr>
                 )}
@@ -258,8 +325,9 @@ const AdminDashboard = () => {
             <AlertDialogAction
               variant="destructive"
               onClick={deleteUser}
+              disabled={isDeleting}
             >
-              Delete user
+              {isDeleting ? "Deleting..." : "Delete user"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

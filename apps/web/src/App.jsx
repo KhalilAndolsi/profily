@@ -21,8 +21,11 @@ import SignUp from "./pages/auth/SignUp";
 import Contact from "./pages/root/Contact";
 import PrivacyPolicy from "./pages/root/PrivacyPolicy";
 import Profile from "./pages/root/Profile";
+import PortfolioPage from "./pages/root/portfolio/PortfolioPage";
+import LinkPage from "./pages/root/link-page/LinkPage";
 
 import RootLayout from "./components/layouts/RootLayout";
+import PublicPageLayout from "./components/layouts/PublicPageLayout";
 import AuthLayout from "./components/layouts/AuthLayout";
 import AdminDashboard from "./pages/root/AdminDashboard";
 import { ProtectedRoute } from "./hooks/useProtectedRoute";
@@ -77,6 +80,14 @@ const App = () => {
             path="portfolio/edit/:id"
             element={
               <ProtectedRoute>
+                <CreatePortfolio forEdit={true} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="portfolio/edit/:id"
+            element={
+              <ProtectedRoute>
                 <CreatePortfolio />
               </ProtectedRoute>
             }
@@ -104,6 +115,13 @@ const App = () => {
           <Route path="/admin/dashboard" element={<ProtectedRoute isAdminRoute={true}><AdminDashboard /></ProtectedRoute>} />
 
           <Route path="*" element={<NotFound />} />
+        </Route>
+
+        <Route path="/portfolio/:id" element={<PublicPageLayout />}>
+          <Route index element={<PortfolioPage />} />
+        </Route>
+        <Route path="/link-page/:username" element={<PublicPageLayout />}>
+          <Route index element={<LinkPage />} />
         </Route>
 
         <Route path="/auth" element={<AuthLayout />}>

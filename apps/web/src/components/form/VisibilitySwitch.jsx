@@ -1,10 +1,6 @@
-import { useState } from "react";
-
 import { Switch } from "@/components/ui/switch";
 
-const VisibilitySwitch = () => {
-  const [isPublic, setIsPublic] = useState(true);
-
+const VisibilitySwitch = ({ isPublic = true, onChange }) => {
   return (
     <div className="flex items-center justify-between gap-4 rounded-3xl border border-border bg-muted/30 px-4 py-3">
       <div>
@@ -19,7 +15,7 @@ const VisibilitySwitch = () => {
       </div>
       <Switch
         checked={isPublic}
-        onCheckedChange={setIsPublic}
+        onCheckedChange={onChange}
         aria-label="Toggle page visibility"
       />
     </div>

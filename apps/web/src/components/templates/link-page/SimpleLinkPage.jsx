@@ -1,37 +1,38 @@
-import { portfolio_mockup } from "../../../constants/mockup"
-import { Card, CardContent } from "../../ui/card"
+import { link_page_mockup } from "../../../constants/mockup";
 
-const SimpleLinkPage = ({ portfolio = portfolio_mockup }) => {
-  const fullName = `${portfolio.firstName} ${portfolio.lastName}`
+const SimpleLinkPage = ({ portfolio = link_page_mockup }) => {
+  const fullName = `${portfolio.firstName} ${portfolio.lastName}`;
 
   return (
-    <main className="min-h-screen bg-background px-6 py-4 text-foreground sm:py-8">
-      <Card className="mx-auto flex min-h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)] max-w-lg flex-col overflow-hidden sm:min-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-4rem)]">
-        <CardContent className="flex min-h-0 flex-1 flex-col items-center text-center">
-          <img
-            className="size-24 rounded-full object-cover ring-4 ring-primary/10"
-            src={portfolio.photo}
-            alt={`${fullName} portrait`}
-          />
-          <h1 className="mt-5 text-2xl font-semibold tracking-tight">{fullName}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{portfolio.bio}</p>
-          <div className="mt-8 min-h-0 w-full flex-1 space-y-3 overflow-y-auto pr-1 flex flex-col pt-2">
-            {portfolio.links.map((link) => (
-              <a
-                className="rounded-xl border border-border bg-card px-5 py-3 text-sm font-medium shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary"
-                href={link.url}
-                key={link.id || link.url}
-                target={link.url.startsWith("mailto:") ? undefined : "_blank"}
-                rel={link.url.startsWith("mailto:") ? undefined : "noreferrer"}
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+    <main className="min-h-screen">
+      <header className="bg-linear-to-t from-primary to-background p-4 pb-10 pt-20 rounded-b-[30%] flex items-center justify-end flex-col">
+        {portfolio.photo && <img
+          className="size-30 rounded-full object-cover ring-4 ring-primary/10 border-4 border-white"
+          src={portfolio.photo?.startsWith("/uploads/") ? `http://localhost:3000${portfolio.photo}` : portfolio.photo}
+          alt={`${fullName} portrait`}
+        />}
+        <h1 className="mt-5 text-3xl font-semibold text-white tracking-tight">
+          {fullName}
+        </h1>
+        <p className="mt-2 text-sm text-gray-200 max-w-md text-center">
+          {portfolio.bio}
+        </p>
+      </header>
+      <section className="w-full px-4 sm:w-md mx-auto mt-14 flex flex-col gap-4">
+          {portfolio.links.map((link) => (
+            <a
+              className="text-center rounded-xl border border-border bg-card px-5 py-3 text-sm font-medium shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:text-primary"
+              href={link.url}
+              key={link.id || link.url}
+              target={"_blank"}
+              rel={"noreferrer"}
+            >
+              {link.label}
+            </a>
+          ))}
+      </section>
     </main>
-  )
-}
+  );
+};
 
-export default SimpleLinkPage
+export default SimpleLinkPage;

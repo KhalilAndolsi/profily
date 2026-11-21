@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,23 +9,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const LanguageInput = () => {
-  const [languages, setLanguages] = useState([{ id: 1 }]);
+const LanguageInput = ({ languages = [], onChange }) => {
 
   const addLanguage = () => {
-    setLanguages((prev) => [...prev, { id: Date.now() }]);
+    onChange?.([...languages, { id: Date.now(), name: "", level: "" }]);
   };
 
   const removeLanguage = (languageId) => {
-    setLanguages((currentLanguages) =>
-      currentLanguages.filter((language) => language.id !== languageId),
+    onChange?.(languages.filter((language) => language.id !== languageId));
+  };
+
+  const updateLanguage = (languageId, field, value) => {
+    onChange?.(
+      languages.map((language) =>
+        language.id === languageId ? { ...language, [field]: value } : language,
+      ),
     );
   };
 
   return (
     <div className="grid min-w-0 gap-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-sm font-medium">Languages</span>
+        <span className="text-sm font-medium">
+          Languages <span className="text-destructive">*</span>
+        </span>
         <Button
           variant="ghost"
           size="sm"
@@ -44,21 +50,27 @@ const LanguageInput = () => {
             key={language.id}
             className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-2"
           >
-            <Select>
+            <Select
+              value={language.name}
+              onValueChange={(value) => updateLanguage(language.id, "name", value)}
+            >
               <SelectTrigger className="w-full min-w-0" aria-label="Language">
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="english">English</SelectItem>
-                <SelectItem value="french">French</SelectItem>
-                <SelectItem value="spanish">Spanish</SelectItem>
-                <SelectItem value="german">German</SelectItem>
-                <SelectItem value="italian">Italian</SelectItem>
-                <SelectItem value="arabic">Arabic</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="English">English</SelectItem>
+                <SelectItem value="French">French</SelectItem>
+                <SelectItem value="Spanish">Spanish</SelectItem>
+                <SelectItem value="German">German</SelectItem>
+                <SelectItem value="Italian">Italian</SelectItem>
+                <SelectItem value="Arabic">Arabic</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
-            <Select>
+            <Select
+              value={language.level}
+              onValueChange={(value) => updateLanguage(language.id, "level", value)}
+            >
               <SelectTrigger
                 className="w-full min-w-0"
                 aria-label="Language level"
@@ -66,11 +78,11 @@ const LanguageInput = () => {
                 <SelectValue placeholder="Select level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="native">Native</SelectItem>
-                <SelectItem value="fluent">Fluent</SelectItem>
-                <SelectItem value="professional">Professional</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="basic">Basic</SelectItem>
+                <SelectItem value="Native">Native</SelectItem>
+                <SelectItem value="Fluent">Fluent</SelectItem>
+                <SelectItem value="Professional">Professional</SelectItem>
+                <SelectItem value="Intermediate">Intermediate</SelectItem>
+                <SelectItem value="Basic">Basic</SelectItem>
               </SelectContent>
             </Select>
             <Button
