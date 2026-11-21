@@ -309,5 +309,34 @@ const portfolio_mockup = {
   ],
 };
 
-export { cv_mockup, portfolio_mockup };
+const link_page_mockup = {
+  id: "a1b2c3d4-5e6f-4a70-8b9c-0d1e2f3a4b5c",
+  title: "Alex Martin - Links",
+  firstName: "Alex",
+  lastName: "Martin",
+  username: "alex-martin",
+  photo: "https://randomuser.me/api/portraits/men/1.jpg",
+  bio:
+    "Frontend developer focused on accessible, fast, and thoughtful digital experiences.",
+  isPublic: true,
+  links: [
+    {
+      id: "4e6a8c0d-2f1b-4d90-a7c5-9b3e1f6d8a20",
+      label: "Portfolio",
+      url: "https://alexmartin.dev",
+    },
+    {
+      id: "1c3e5a7b-9d2f-4b60-8e4c-6a0d2f5b7c91",
+      label: "GitHub",
+      url: "https://github.com/alex-martin",
+    },
+    {
+      id: "6b8d0f2a-4c1e-4a70-9f3b-5d7e1c8a2b46",
+      label: "LinkedIn",
+      url: "https://www.linkedin.com/in/alex-martin",
+    },
+  ],
+};
+
+export { cv_mockup, portfolio_mockup, link_page_mockup };
 export default cv_mockup;

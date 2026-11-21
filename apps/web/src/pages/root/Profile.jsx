@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AlertTriangle,
   Calendar,
@@ -8,14 +8,15 @@ import {
   RefreshCw,
   Sun,
   Trash2,
-  UserRound,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,23 +32,72 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/components/providers/auth-provider";
+import api from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
-  const {user} = useAuth();
+  const { user, updateUser, signOut } = useAuth();
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const [message, setMessage] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
+  const [nickname, setNickname] = useState(user?.nickname ?? "");
+  const [avatar, setAvatar] = useState(user?.avatar ?? "");
+  const [savingProfile, setSavingProfile] = useState(false);
 
-  const removePageType = (label) => {
-    setMessage(`All ${label} have been removed.`);
+  useEffect(() => {
+    setNickname(user?.nickname ?? "");
+    setAvatar(user?.avatar ?? "");
+  }, [user]);
+
+  const removePageType = async (label, endpoint) => {
+    try {
+      await api.delete(endpoint);
+      setMessage(`All ${label} have been removed.`);
+    } catch (requestError) {
+      setMessage(requestError.response?.data?.message || `Could not remove ${label}.`);
+    }
   };
 
-  const clearAllData = () => {
-    setMessage("All pages and saved data have been deleted.");
+  const clearAllData = async () => {
+    try {
+      await Promise.all([
+        api.delete("/cv/me"),
+        api.delete("/portfolio/me"),
+        api.delete("/link-page/me"),
+      ]);
+      setMessage("All pages and saved data have been deleted.");
+    } catch (requestError) {
+      setMessage(requestError.response?.data?.message || "Could not delete all data.");
+    }
   };
 
-  const removeAccount = () => {
-    setMessage("Account removal is not available yet.");
+  const removeAccount = async () => {
+    try {
+      await api.delete("/auth/account");
+      signOut();
+      navigate("/");
+    } catch (requestError) {
+      setMessage(requestError.response?.data?.message || "Could not remove the account.");
+    }
+  };
+
+  const generateRandomAvatar = () => {
+    setAvatar(`https://api.dicebear.com/10.x/lorelei/svg?seed=${Math.random()}`);
+  };
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    setMessage("");
+    try {
+      const response = await api.patch("/auth/me", { nickname, avatar });
+      updateUser({ ...user, ...response.data.user });
+      setMessage("Profile updated successfully.");
+    } catch (requestError) {
+      setMessage(requestError.response?.data?.message || "Could not update profile.");
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const openDeleteDialog = (title, description, action) => {
@@ -76,7 +126,10 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="flex flex-col gap-6 sm:flex-row sm:items-center">
             <Avatar size="lg" className="size-24">
-              <AvatarImage src={user.avatar} alt={`${user.nickname}'s avatar`} />
+              <AvatarImage
+                src={user.avatar}
+                alt={`${user.nickname}'s avatar`}
+              />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
             <div className="space-y-2">
@@ -87,7 +140,9 @@ const Profile = () => {
               </p>
               <p className="flex items-center gap-2 text-muted-foreground">
                 <Calendar size={16} />
-                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
+                {user.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
           </CardContent>
@@ -110,26 +165,33 @@ const Profile = () => {
               </div>
               <div className="flex items-center gap-4">
                 <Avatar size="lg" className="size-20">
-                  <AvatarImage src={user.avatar} alt={`${user.nickname}'s avatar`} />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarImage
+                    src={avatar}
+                    alt={`${nickname || "User"}'s avatar`}
+                  />
+                  <AvatarFallback>
+                    {nickname ? nickname.slice(0, 2).toUpperCase() : "U"}
+                  </AvatarFallback>
                 </Avatar>
-                <Button type="button" variant="outline">
+                <Button type="button" variant="outline" onClick={generateRandomAvatar}>
                   <RefreshCw />
                   Generate random avatar
                 </Button>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="display-name">Display name</Label>
-                <Input
-                  id="display-name"
-                  defaultValue={user.nickname}
-                />
+                <Input id="display-name" value={nickname} onChange={(event) => setNickname(event.target.value)} minLength={2} maxLength={50} />
               </div>
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <Button type="button" variant="outline">
+                <Button type="button" variant="outline" onClick={() => {
+                  setNickname(user?.nickname ?? "");
+                  setAvatar(user?.avatar ?? "");
+                }}>
                   Cancel
                 </Button>
-                <Button type="button">Save</Button>
+                <Button type="button" onClick={saveProfile} disabled={savingProfile}>
+                  {savingProfile ? "Saving..." : "Save"}
+                </Button>
               </div>
             </section>
             <section className="space-y-4">
@@ -175,7 +237,7 @@ const Profile = () => {
                   openDeleteDialog(
                     "Remove all CVs?",
                     "This will permanently remove all of your CVs.",
-                    () => removePageType("CVs"),
+                    () => removePageType("CVs", "/cv/me"),
                   )
                 }
               >
@@ -188,7 +250,7 @@ const Profile = () => {
                   openDeleteDialog(
                     "Remove all portfolios?",
                     "This will permanently remove all of your portfolios.",
-                    () => removePageType("portfolios"),
+                    () => removePageType("portfolios", "/portfolio/me"),
                   )
                 }
               >
@@ -201,7 +263,7 @@ const Profile = () => {
                   openDeleteDialog(
                     "Remove all links pages?",
                     "This will permanently remove all of your links pages.",
-                    () => removePageType("links pages"),
+                    () => removePageType("links pages", "/link-page/me"),
                   )
                 }
               >
@@ -242,7 +304,7 @@ const Profile = () => {
                 onClick={() =>
                   openDeleteDialog(
                     "Remove account?",
-                    "Account removal is not available yet. No account data will be changed.",
+                    "This will permanently delete your account and all CVs, portfolios, and links pages.",
                     removeAccount,
                   )
                 }

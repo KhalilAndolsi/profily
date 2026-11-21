@@ -5,9 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const SkillsInput = () => {
+const SkillsInput = ({ skills = [], onChange }) => {
   const [skillInput, setSkillInput] = useState("");
-  const [skills, setSkills] = useState([]);
 
   const addSkill = () => {
     const skill = skillInput.trim();
@@ -16,14 +15,12 @@ const SkillsInput = () => {
       return;
     }
 
-    setSkills((currentSkills) => [...currentSkills, skill]);
+    onChange?.([...skills, skill]);
     setSkillInput("");
   };
 
   const removeSkill = (skillToRemove) => {
-    setSkills((currentSkills) =>
-      currentSkills.filter((skill) => skill !== skillToRemove),
-    );
+    onChange?.(skills.filter((skill) => skill !== skillToRemove));
   };
 
   return (
@@ -35,6 +32,7 @@ const SkillsInput = () => {
           onChange={(event) => setSkillInput(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
+              event.preventDefault();
               addSkill();
             }
           }}

@@ -10,8 +10,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const DatePicker = ({ placeholder = "Pick a date" }) => {
-  const [date, setDate] = useState();
+const DatePicker = ({ placeholder = "Pick a date", value, onChange }) => {
+  const [internalDate, setInternalDate] = useState();
+  const date = value === undefined ? internalDate : value;
+  const setDate = onChange ?? setInternalDate;
+  const selectedDate =
+    date instanceof Date
+      ? date
+      : date
+        ? new Date(`${date}T12:00:00`)
+        : undefined;
 
   return (
     <Popover>
@@ -25,10 +33,10 @@ const DatePicker = ({ placeholder = "Pick a date" }) => {
         }
       >
         <CalendarIcon />
-        {date ? format(date, "PPP") : <span>{placeholder}</span>}
+        {selectedDate ? format(selectedDate, "PPP") : <span>{placeholder}</span>}
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <Calendar mode="single" selected={date} onSelect={setDate} />
+        <Calendar mode="single" selected={selectedDate} onSelect={setDate} />
       </PopoverContent>
     </Popover>
   );

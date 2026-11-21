@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import UserModel from "../models/UserModel.js";
 import { generateToken } from "../utils/jwt.js";
+import CvModel from "../models/CvModel.js";
+import PortfolioModel from "../models/PortfolioModel.js";
+import LinkPageModel from "../models/LinkPageModel.js";
 
 const tokenMaxAge = 7 * 24 * 60 * 60 * 1000;
 
@@ -112,5 +115,66 @@ export const login = async (req, res, next) => {
     });
   } catch (requestError) {
     return next(requestError);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const nickname =
+      typeof req.body.nickname === "string" ? req.body.nickname.trim() : "";
+    const avatar =
+      typeof req.body.avatar === "string" ? req.body.avatar.trim() : "";
+
+    if (nickname.length < 2 || nickname.length > 50) {
+      return res.status(400).json({
+        message: "Nickname must contain between 2 and 50 characters",
+      });
+    }
+    if (avatar && !/^https?:\/\/.+/i.test(avatar)) {
+      return res.status(400).json({
+        message: "Avatar must be a valid HTTP or HTTPS URL",
+      });
+    }
+
+    const user = await UserModel.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.nickname = nickname;
+    user.avatar = avatar || null;
+    await user.save();
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: user.id,
+        nickname: user.nickname,
+        email: user.email,
+        avatar: user.avatar,
+        createdAt: user.createdAt,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteAccount = async (req, res, next) => {
+  try {
+    await Promise.all([
+      CvModel.deleteMany({ owner: req.userId }),
+      PortfolioModel.deleteMany({ owner: req.userId }),
+      LinkPageModel.deleteMany({ owner: req.userId }),
+      UserModel.findByIdAndDelete(req.userId),
+    ]);
+
+    res.clearCookie("token");
+    return res.status(200).json({
+      message: "Account and all associated data deleted successfully",
+    });
+  } catch (error) {
+    return next(error);
   }
 };

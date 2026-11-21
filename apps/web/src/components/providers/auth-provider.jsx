@@ -58,12 +58,21 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateUser = (updatedUser) => {
+    localStorage.setItem(
+      CURRENT_USER_STORAGE_KEY,
+      JSON.stringify(updatedUser),
+    );
+    setUser(updatedUser);
+  };
+
   const value = {
     user,
     isAuthenticated: user !== null,
     login,
     signUp,
     signOut,
+    updateUser,
   };
 
   return (
